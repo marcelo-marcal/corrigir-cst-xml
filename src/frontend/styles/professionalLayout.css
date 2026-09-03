@@ -1292,3 +1292,66 @@ tbody tr:hover {
 .sidebar-collapsed .sidebar-nav {
   margin-top: 22px !important;
 }
+/* =========================================================
+   BOTÃO DE RECOLHER DENTRO DO BRAND BOX
+   ========================================================= */
+
+.brand-box {
+  position: relative !important;
+  padding-right: 36px !important;
+}
+
+.sidebar-toggle-button {
+  position: absolute !important;
+  top: 50% !important;
+  right: 8px !important;
+  z-index: 10 !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 22px !important;
+  height: 30px !important;
+  border: 1px solid var(--fx-border) !important;
+  border-radius: 8px !important;
+  color: var(--fx-primary) !important;
+  background: rgba(5, 15, 19, 0.86) !important;
+  box-shadow: none !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  transform: translateY(-50%) !important;
+}
+
+.sidebar-toggle-button:hover {
+  border-color: var(--fx-border-strong) !important;
+  background: var(--fx-bg-card-soft) !important;
+}
+
+.sidebar-collapsed .brand-box {
+  width: 48px !important;
+  min-height: 52px !important;
+  padding: 7px !important;
+  justify-content: center !important;
+}
+
+.sidebar-collapsed .brand-mark {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+
+.sidebar-collapsed .sidebar-toggle-button {
+  top: auto !important;
+  right: 50% !important;
+  bottom: -13px !important;
+  width: 22px !important;
+  height: 18px !important;
+  border-radius: 7px !important;
+  font-size: 15px !important;
+  transform: translateX(50%) !important;
+  background: var(--fx-bg-sidebar) !important;
+}
+
+.sidebar-collapsed .sidebar-nav {
+  margin-top: 22px !important;
+}

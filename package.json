@@ -1,0 +1,52 @@
+{
+  "name": "corretor-fiscal-fx",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Corretor Fiscal FX - Correção em lote de XML NFC-e/NF-e",
+  "author": "FX",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "desktop": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "dist": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "typescript": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "concurrently": "latest",
+    "cross-env": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "wait-on": "latest"
+  },
+  "build": {
+    "appId": "br.com.fx.corretor-fiscal",
+    "productName": "Corretor Fiscal FX",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

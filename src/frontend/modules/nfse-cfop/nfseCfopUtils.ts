@@ -35,6 +35,7 @@ const UF_POR_PREFIXO_IBGE: Record<string, string> = {
   "53": "DF",
 };
 
+const PASTA_RAIZ_SEPARACAO = "nfse-separadas-questor";
 const PASTA_INTERNAS = "internas-5-933-004";
 const PASTA_INTERESTADUAIS = "interestaduais-6-933-004";
 const PASTA_NAO_IDENTIFICADAS = "nao-identificados-conferir";
@@ -199,7 +200,7 @@ export function montarCaminhoSeparado(params: {
   pastaDestino: string;
   caminhoOriginal: string;
 }): string {
-  return `${params.pastaDestino}/${params.caminhoOriginal}`;
+  return `${PASTA_RAIZ_SEPARACAO}/${params.pastaDestino}/${params.caminhoOriginal}`;
 }
 
 export function gerarRelatorioNfseCfop(params: {
@@ -213,6 +214,9 @@ export function gerarRelatorioNfseCfop(params: {
 
   linhas.push("CORRETOR FISCAL FX");
   linhas.push("Relatório de Separação NFSe para Importação no Questor");
+  linhas.push("");
+  linhas.push("Pasta principal gerada:");
+  linhas.push(PASTA_RAIZ_SEPARACAO);
   linhas.push("");
   linhas.push("Objetivo:");
   linhas.push(
@@ -235,9 +239,9 @@ export function gerarRelatorioNfseCfop(params: {
   linhas.push(`Arquivos não identificados: ${params.arquivosNaoIdentificados}`);
   linhas.push("");
   linhas.push("Pastas geradas:");
-  linhas.push(`- ${PASTA_INTERNAS}`);
-  linhas.push(`- ${PASTA_INTERESTADUAIS}`);
-  linhas.push(`- ${PASTA_NAO_IDENTIFICADAS}`);
+  linhas.push(`- ${PASTA_RAIZ_SEPARACAO}/${PASTA_INTERNAS}`);
+  linhas.push(`- ${PASTA_RAIZ_SEPARACAO}/${PASTA_INTERESTADUAIS}`);
+  linhas.push(`- ${PASTA_RAIZ_SEPARACAO}/${PASTA_NAO_IDENTIFICADAS}`);
   linhas.push("");
   linhas.push("Detalhamento:");
   linhas.push("");
@@ -254,33 +258,39 @@ export function gerarRelatorioNfseCfop(params: {
 
     if (resultado.categoria === "interna") {
       linhas.push(
-        `[INTERNA] ${resultado.caminho} -> ${resultado.pastaDestino} - Natureza Questor ${resultado.naturezaQuestor} - ${localizacao}`,
+        `[INTERNA] ${resultado.caminho} -> ${PASTA_RAIZ_SEPARACAO}/${resultado.pastaDestino} - Natureza Questor ${resultado.naturezaQuestor} - ${localizacao}`,
       );
       continue;
     }
 
     if (resultado.categoria === "interestadual") {
       linhas.push(
-        `[INTERESTADUAL] ${resultado.caminho} -> ${resultado.pastaDestino} - Natureza Questor ${resultado.naturezaQuestor} - ${localizacao}`,
+        `[INTERESTADUAL] ${resultado.caminho} -> ${PASTA_RAIZ_SEPARACAO}/${resultado.pastaDestino} - Natureza Questor ${resultado.naturezaQuestor} - ${localizacao}`,
       );
       continue;
     }
 
     linhas.push(
-      `[CONFERIR] ${resultado.caminho} -> ${resultado.pastaDestino} - Não foi possível identificar UF do prestador ou UF do tomador - ${localizacao}`,
+      `[CONFERIR] ${resultado.caminho} -> ${PASTA_RAIZ_SEPARACAO}/${resultado.pastaDestino} - Não foi possível identificar UF do prestador ou UF do tomador - ${localizacao}`,
     );
   }
 
   linhas.push("");
+  linhas.push("Como importar no Questor:");
+  linhas.push("");
+  linhas.push(
+    `1. Importe a pasta ${PASTA_RAIZ_SEPARACAO}/${PASTA_INTERNAS} usando Natureza 5.933.004.`,
+  );
+  linhas.push(
+    `2. Importe a pasta ${PASTA_RAIZ_SEPARACAO}/${PASTA_INTERESTADUAIS} usando Natureza 6.933.004.`,
+  );
+  linhas.push(
+    `3. Confira manualmente a pasta ${PASTA_RAIZ_SEPARACAO}/${PASTA_NAO_IDENTIFICADAS}, se houver arquivos nela.`,
+  );
+  linhas.push("");
   linhas.push("Observação:");
   linhas.push(
     "Os XMLs originais não foram alterados. O sistema apenas copiou cada arquivo para a pasta correta de importação.",
-  );
-  linhas.push(
-    "Após a separação, importe a pasta internas-5-933-004 no Questor usando Natureza 5.933.004.",
-  );
-  linhas.push(
-    "Depois importe a pasta interestaduais-6-933-004 no Questor usando Natureza 6.933.004.",
   );
 
   return linhas.join("\n");

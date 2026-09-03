@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
 
+import { FxKpiCard } from "../../components/FxKpiCard";
+import { FxPageHeader } from "../../components/FxPageHeader";
+import { FxStepCard } from "../../components/FxStepCard";
 import type {
   ArquivoXmlSelecionado,
   FileSystemDirectoryHandleFx,
@@ -271,24 +274,18 @@ export function XmlCorrecaoPage() {
 
   return (
     <div className="xml-correcao-page">
-      <section className="page-hero">
-        <div>
-          <p className="eyebrow">XML NFC-e/NF-e</p>
-          <h2>Correção em lote de tags XML</h2>
-          <p>
-            Selecione os XMLs, informe a tag e o valor que deve ser substituído.
-            O sistema gera cópias corrigidas sem sobrescrever os arquivos
-            originais.
-          </p>
-        </div>
-
+      <FxPageHeader
+        eyebrow="XML NFC-e/NF-e"
+        titulo="Correção em lote de tags XML"
+        descricao="Selecione os XMLs, informe a tag e o valor que deve ser substituído. O sistema gera cópias corrigidas sem sobrescrever os arquivos originais."
+      >
         <div className={`status-pill status-${status}`}>
           {status === "parado" && "Aguardando"}
           {status === "processando" && "Processando"}
           {status === "concluido" && "Concluído"}
           {status === "erro" && "Atenção"}
         </div>
-      </section>
+      </FxPageHeader>
 
       <section className="filter-panel">
         <div className="field-group">
@@ -332,111 +329,95 @@ export function XmlCorrecaoPage() {
       </section>
 
       <section className="stepper-grid">
-        <article className="step-card">
-          <div className="step-icon">☁</div>
+        <FxStepCard
+          numero={1}
+          titulo="Selecionar XMLs"
+          descricao={pastaOrigem || "Nenhum XML selecionado"}
+          icone="☁"
+        >
+          <label className="primary-button file-button">
+            Selecionar XMLs
+            <input
+              type="file"
+              accept=".xml,text/xml,application/xml"
+              multiple
+              onChange={selecionarArquivosOrigem}
+            />
+          </label>
 
-          <div>
-            <strong>1. Selecionar XMLs</strong>
-            <span>{pastaOrigem || "Nenhum XML selecionado"}</span>
-          </div>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={selecionarPastaOrigem}
+          >
+            Usar pasta inteira
+          </button>
+        </FxStepCard>
 
-          <div className="step-actions">
-            <label className="primary-button file-button">
-              Selecionar XMLs
-              <input
-                type="file"
-                accept=".xml,text/xml,application/xml"
-                multiple
-                onChange={selecionarArquivosOrigem}
-              />
-            </label>
+        <FxStepCard
+          numero={2}
+          titulo="Pasta de saída"
+          descricao={nomePastaDestino || "Nenhuma pasta escolhida"}
+          icone="▣"
+        >
+          <button
+            type="button"
+            className="primary-button"
+            onClick={selecionarPastaDestino}
+          >
+            Escolher saída
+          </button>
+        </FxStepCard>
 
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={selecionarPastaOrigem}
-            >
-              Usar pasta inteira
-            </button>
-          </div>
-        </article>
-
-        <article className="step-card">
-          <div className="step-icon">▣</div>
-
-          <div>
-            <strong>2. Pasta de saída</strong>
-            <span>{nomePastaDestino || "Nenhuma pasta escolhida"}</span>
-          </div>
-
-          <div className="step-actions">
-            <button
-              type="button"
-              className="primary-button"
-              onClick={selecionarPastaDestino}
-            >
-              Escolher saída
-            </button>
-          </div>
-        </article>
-
-        <article className="step-card">
-          <div className="step-icon">🛠</div>
-
-          <div>
-            <strong>3. Corrigir XMLs</strong>
-            <span>{mensagem}</span>
-          </div>
-
-          <div className="step-actions">
-            <button
-              type="button"
-              className="primary-button"
-              onClick={corrigirXmls}
-              disabled={status === "processando"}
-            >
-              {status === "processando" ? "Corrigindo..." : "Corrigir XMLs"}
-            </button>
-          </div>
-        </article>
+        <FxStepCard
+          numero={3}
+          titulo="Corrigir XMLs"
+          descricao={mensagem}
+          icone="🛠"
+        >
+          <button
+            type="button"
+            className="primary-button"
+            onClick={corrigirXmls}
+            disabled={status === "processando"}
+          >
+            {status === "processando" ? "Corrigindo..." : "Corrigir XMLs"}
+          </button>
+        </FxStepCard>
       </section>
 
       <section className="kpi-grid">
-        <article className="kpi-card kpi-orange">
-          <div className="kpi-icon">▤</div>
-          <div className="kpi-info">
-            <strong>{arquivosSelecionados.length}</strong>
-            <span>Arquivos selecionados</span>
-            <small>Total de XMLs carregados para análise.</small>
-          </div>
-        </article>
+        <FxKpiCard
+          valor={arquivosSelecionados.length}
+          titulo="Arquivos selecionados"
+          descricao="Total de XMLs carregados para análise."
+          icone="▤"
+          variante="orange"
+        />
 
-        <article className="kpi-card kpi-purple">
-          <div className="kpi-icon">⚠</div>
-          <div className="kpi-info">
-            <strong>{arquivosComErro}</strong>
-            <span>Arquivos com erro</span>
-            <small>Falhas encontradas durante o processamento.</small>
-          </div>
-        </article>
+        <FxKpiCard
+          valor={arquivosComErro}
+          titulo="Arquivos com erro"
+          descricao="Falhas encontradas durante o processamento."
+          icone="⚠"
+          variante="purple"
+        />
 
-        <article className="kpi-card kpi-blue">
-          <div className="kpi-icon">⚖</div>
-          <div className="kpi-info">
-            <strong>{totalAlteracoes}</strong>
-            <span>Alterações feitas</span>
-            <small>Total de tags substituídas nos XMLs.</small>
-          </div>
-        </article>
+        <FxKpiCard
+          valor={totalAlteracoes}
+          titulo="Alterações feitas"
+          descricao="Total de tags substituídas nos XMLs."
+          icone="⚖"
+          variante="blue"
+        />
 
-        <article className="kpi-card kpi-teal">
-          <div className="kpi-icon">✓</div>
-          <div className="kpi-info">
-            <strong>{arquivosCorrigidos}</strong>
-            <span>Arquivos corrigidos</span>
-            <small>XMLs gravados com alteração na pasta de saída.</small>
-          </div>
-        </article>
+        <FxKpiCard
+          valor={arquivosCorrigidos}
+          titulo="Arquivos corrigidos"
+          descricao="XMLs gravados com alteração na pasta de saída."
+          icone="✓"
+          variante="teal"
+        />
       </section>
 
       <section className="progress-panel">

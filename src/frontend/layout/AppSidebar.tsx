@@ -19,16 +19,16 @@ export function AppSidebar(props: AppSidebarProps) {
             <strong>Corretor Fiscal</strong>
             <span>Automação XML/SPED</span>
           </div>
-        </div>
 
-        <button
-          type="button"
-          className="sidebar-toggle-button"
-          onClick={props.aoAlternarSidebar}
-          title={props.recolhida ? "Expandir menu" : "Recolher menu"}
-        >
-          {props.recolhida ? "›" : "‹"}
-        </button>
+          <button
+            type="button"
+            className="sidebar-toggle-button"
+            onClick={props.aoAlternarSidebar}
+            title={props.recolhida ? "Expandir menu" : "Recolher menu"}
+          >
+            {props.recolhida ? "›" : "‹"}
+          </button>
+        </div>
       </div>
 
       <nav className="sidebar-nav">

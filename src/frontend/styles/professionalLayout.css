@@ -1157,3 +1157,75 @@ tbody tr:hover {
     padding: 6px 12px;
   }
 }
+/* =========================================================
+   CORREÇÃO FINAL DA SIDEBAR RECOLHIDA
+   ========================================================= */
+
+.sidebar-collapsed .brand-text,
+.sidebar-collapsed .sidebar-label {
+  display: none !important;
+}
+
+.sidebar-collapsed .brand-box {
+  width: 48px !important;
+  min-height: 52px !important;
+  padding: 7px !important;
+  justify-content: center !important;
+}
+
+.sidebar-collapsed .brand-mark {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+
+.sidebar-collapsed .sidebar-nav {
+  gap: 10px !important;
+  margin-top: 16px !important;
+  align-items: center !important;
+}
+
+.sidebar-collapsed .sidebar-item {
+  display: grid !important;
+  grid-template-columns: 34px !important;
+  grid-template-rows: 34px !important;
+  place-items: center !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  padding: 7px !important;
+  border-radius: 12px !important;
+}
+
+.sidebar-collapsed .sidebar-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+}
+
+.sidebar-collapsed .sidebar-item.active {
+  border-color: var(--fx-border-strong) !important;
+  box-shadow: inset 3px 0 0 var(--fx-primary) !important;
+}
+
+.sidebar-collapsed .sidebar-toggle-button {
+  top: 44px !important;
+  right: -18px !important;
+  width: 18px !important;
+  height: 32px !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-size: 16px !important;
+  background: var(--fx-bg-sidebar) !important;
+}
+
+.sidebar-collapsed .app-sidebar {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.app-shell.sidebar-collapsed {
+  --fx-sidebar-width: 70px !important;
+}

@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Builds gerados
+dist/
+dist-electron/
+release/

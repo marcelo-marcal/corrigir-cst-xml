@@ -2,7 +2,10 @@ import type {
   ArquivoNfseSelecionado,
   CategoriaSeparacaoNfse,
   FileSystemDirectoryHandleNfseFx,
+  PastaDestinoElectronNfseFx,
+  PastaDestinoNfseFx,
   ResultadoArquivoNfseCfop,
+  WindowComFileSystemAccessNfse,
 } from "./nfseCfopTypes";
 
 const UF_POR_PREFIXO_IBGE: Record<string, string> = {
@@ -39,6 +42,12 @@ const PASTA_RAIZ_SEPARACAO = "nfse-separadas-questor";
 const PASTA_INTERNAS = "internas-5-933-004";
 const PASTA_INTERESTADUAIS = "interestaduais-6-933-004";
 const PASTA_NAO_IDENTIFICADAS = "nao-identificados-conferir";
+
+function pastaDestinoEhElectron(
+  pastaDestino: PastaDestinoNfseFx,
+): pastaDestino is PastaDestinoElectronNfseFx {
+  return "tipo" in pastaDestino && pastaDestino.tipo === "electron";
+}
 
 export function converterFileListParaNfses(
   fileList: FileList | null,
@@ -84,7 +93,7 @@ export async function listarNfsesRecursivo(
   return arquivos;
 }
 
-export async function criarArquivoNfseNaPasta(
+async function criarArquivoNfseNaPastaDoNavegador(
   pastaDestino: FileSystemDirectoryHandleNfseFx,
   caminhoRelativo: string,
   conteudo: string,
@@ -111,6 +120,38 @@ export async function criarArquivoNfseNaPasta(
   await gravador.close();
 }
 
+export async function criarArquivoNfseNoDestino(
+  pastaDestino: PastaDestinoNfseFx,
+  caminhoRelativo: string,
+  conteudo: string,
+): Promise<void> {
+  if (pastaDestinoEhElectron(pastaDestino)) {
+    const navegador = window as WindowComFileSystemAccessNfse;
+
+    if (!navegador.fxElectron) {
+      throw new Error("Integração Electron não encontrada.");
+    }
+
+    const resultado = await navegador.fxElectron.gravarArquivoTexto({
+      pastaBase: pastaDestino.caminho,
+      caminhoRelativo,
+      conteudo,
+    });
+
+    if (!resultado.ok) {
+      throw new Error(resultado.error ?? "Não foi possível gravar o arquivo.");
+    }
+
+    return;
+  }
+
+  await criarArquivoNfseNaPastaDoNavegador(
+    pastaDestino,
+    caminhoRelativo,
+    conteudo,
+  );
+}
+
 export function obterUfPrestador(conteudoXml: string): string | undefined {
   const resultado = conteudoXml.match(
     /<emit\b[\s\S]*?<enderNac\b[\s\S]*?<UF>\s*([A-Z]{2})\s*<\/UF>[\s\S]*?<\/enderNac>[\s\S]*?<\/emit>/i,
@@ -119,7 +160,9 @@ export function obterUfPrestador(conteudoXml: string): string | undefined {
   return resultado?.[1]?.toUpperCase();
 }
 
-export function obterCodigoMunicipioTomador(conteudoXml: string): string | undefined {
+export function obterCodigoMunicipioTomador(
+  conteudoXml: string,
+): string | undefined {
   const resultado = conteudoXml.match(
     /<toma\b[\s\S]*?<end\b[\s\S]*?<endNac\b[\s\S]*?<cMun>\s*(\d{7})\s*<\/cMun>[\s\S]*?<\/endNac>[\s\S]*?<\/end>[\s\S]*?<\/toma>/i,
   );

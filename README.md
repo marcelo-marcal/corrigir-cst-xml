@@ -73,3 +73,5 @@ export default defineConfig([
 ])
 
 ```
+
+O executável está na pasta.: dist-electron.

@@ -6,7 +6,7 @@ import { FxPageHeader } from "../../components/FxPageHeader";
 import { FxStepCard } from "../../components/FxStepCard";
 import type {
   ArquivoNfseSelecionado,
-  FileSystemDirectoryHandleNfseFx,
+  PastaDestinoNfseFx,
   ResultadoArquivoNfseCfop,
   StatusExecucaoNfseCfop,
   WindowComFileSystemAccessNfse,
@@ -14,7 +14,7 @@ import type {
 import {
   analisarNfseParaSeparacaoQuestor,
   converterFileListParaNfses,
-  criarArquivoNfseNaPasta,
+  criarArquivoNfseNoDestino,
   gerarRelatorioNfseCfop,
   listarNfsesRecursivo,
   montarCaminhoSeparado,
@@ -25,8 +25,9 @@ export function NfseCfopPage() {
     ArquivoNfseSelecionado[]
   >([]);
   const [pastaOrigem, setPastaOrigem] = useState("");
-  const [pastaDestino, setPastaDestino] =
-    useState<FileSystemDirectoryHandleNfseFx | null>(null);
+  const [pastaDestino, setPastaDestino] = useState<PastaDestinoNfseFx | null>(
+    null,
+  );
   const [nomePastaDestino, setNomePastaDestino] = useState("");
 
   const [status, setStatus] = useState<StatusExecucaoNfseCfop>("parado");
@@ -45,7 +46,6 @@ export function NfseCfopPage() {
   const arquivosNaoIdentificados = resultados.filter(
     (item) => item.categoria === "naoIdentificada",
   ).length;
-  const arquivosComErro = resultados.filter((item) => Boolean(item.erro)).length;
 
   function selecionarArquivosOrigem(evento: ChangeEvent<HTMLInputElement>): void {
     const arquivos = converterFileListParaNfses(evento.target.files);
@@ -105,6 +105,30 @@ export function NfseCfopPage() {
     try {
       const navegador = window as WindowComFileSystemAccessNfse;
 
+      if (navegador.fxElectron) {
+        const pasta = await navegador.fxElectron.selecionarPastaDestino();
+
+        if (pasta.canceled) {
+          return;
+        }
+
+        if (!pasta.filePath || !pasta.name) {
+          setStatus("erro");
+          setMensagem("O Electron não retornou uma pasta de saída válida.");
+          return;
+        }
+
+        setPastaDestino({
+          tipo: "electron",
+          caminho: pasta.filePath,
+          nome: pasta.name,
+        });
+        setNomePastaDestino(pasta.name);
+        setStatus("parado");
+        setMensagem("Pasta de saída selecionada. Você já pode separar as NFSe.");
+        return;
+      }
+
       if (!navegador.showDirectoryPicker) {
         setStatus("erro");
         setMensagem("Seu navegador não liberou seleção de pasta de saída.");
@@ -115,6 +139,7 @@ export function NfseCfopPage() {
 
       setPastaDestino(pasta);
       setNomePastaDestino(pasta.name);
+      setStatus("parado");
       setMensagem("Pasta de saída selecionada. Você já pode separar as NFSe.");
     } catch (erro) {
       if (erro instanceof Error && erro.name === "AbortError") {
@@ -158,7 +183,7 @@ export function NfseCfopPage() {
           caminhoOriginal: item.caminho,
         });
 
-        await criarArquivoNfseNaPasta(
+        await criarArquivoNfseNoDestino(
           pastaDestino,
           caminhoSeparado,
           conteudoOriginal,
@@ -216,9 +241,9 @@ export function NfseCfopPage() {
       resultados: novosResultados,
     });
 
-    await criarArquivoNfseNaPasta(
+    await criarArquivoNfseNoDestino(
       pastaDestino,
-      "relatorio-separacao-nfse-questor.txt",
+      "nfse-separadas-questor/relatorio-separacao-nfse-questor.txt",
       relatorio,
     );
 
@@ -353,7 +378,7 @@ export function NfseCfopPage() {
         />
 
         <FxKpiCard
-          valor={arquivosComErro + arquivosNaoIdentificados}
+          valor={arquivosNaoIdentificados}
           titulo="Conferir"
           descricao="Arquivos com erro ou sem identificação completa."
           icone="⚠"

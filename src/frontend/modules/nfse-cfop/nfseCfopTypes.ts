@@ -51,9 +51,34 @@ export type FileSystemDirectoryHandleNfseFx = {
   }>;
 };
 
+export type PastaDestinoElectronNfseFx = {
+  tipo: "electron";
+  caminho: string;
+  nome: string;
+};
+
+export type PastaDestinoNfseFx =
+  | FileSystemDirectoryHandleNfseFx
+  | PastaDestinoElectronNfseFx;
+
 export type WindowComFileSystemAccessNfse = Window &
   typeof globalThis & {
     showDirectoryPicker?: (options?: {
       mode?: "read" | "readwrite";
     }) => Promise<FileSystemDirectoryHandleNfseFx>;
+    fxElectron?: {
+      selecionarPastaDestino: () => Promise<{
+        canceled: boolean;
+        filePath?: string;
+        name?: string;
+      }>;
+      gravarArquivoTexto: (params: {
+        pastaBase: string;
+        caminhoRelativo: string;
+        conteudo: string;
+      }) => Promise<{
+        ok: boolean;
+        error?: string;
+      }>;
+    };
   };

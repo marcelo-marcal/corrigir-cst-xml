@@ -11,6 +11,7 @@ import type {
 } from "./frontend/layout/layoutTypes";
 import { AtualizacaoPage } from "./frontend/modules/atualizacao/AtualizacaoPage";
 import { ConfiguracoesPage } from "./frontend/modules/configuracoes/ConfiguracoesPage";
+import { NfseCfopPage } from "./frontend/modules/nfse-cfop/NfseCfopPage";
 import { ProdutosDominioPage } from "./frontend/modules/produtos-dominio/ProdutosDominioPage";
 import { SpedFiscalPage } from "./frontend/modules/sped-fiscal/SpedFiscalPage";
 import { ValidacaoPvaPage } from "./frontend/modules/validacao-pva/ValidacaoPvaPage";
@@ -22,6 +23,12 @@ const ABAS: ItemMenuSistema[] = [
     titulo: "XML NFC-e/NF-e",
     subtitulo: "Correção em lote",
     icone: obterIconeAba("xml"),
+  },
+  {
+    id: "nfseCfop",
+    titulo: "NFSe CFOP",
+    subtitulo: "5.xxx.xxx para 6.xxx.xxx",
+    icone: obterIconeAba("nfseCfop"),
   },
   {
     id: "validacao",
@@ -87,6 +94,10 @@ function App() {
         <section className="app-content">
           <div style={{ display: abaAtiva === "xml" ? "block" : "none" }}>
             <XmlCorrecaoPage />
+          </div>
+
+          <div style={{ display: abaAtiva === "nfseCfop" ? "block" : "none" }}>
+            <NfseCfopPage />
           </div>
 
           <div style={{ display: abaAtiva === "validacao" ? "block" : "none" }}>

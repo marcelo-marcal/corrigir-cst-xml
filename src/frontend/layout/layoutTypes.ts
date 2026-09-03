@@ -1,5 +1,6 @@
 export type AbaSistema =
   | "xml"
+  | "nfseCfop"
   | "validacao"
   | "sped"
   | "dominio"

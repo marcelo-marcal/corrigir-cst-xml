@@ -3,6 +3,7 @@ import type { AbaSistema, TemaSistema } from "./layoutTypes";
 export function obterIconeAba(aba: AbaSistema): string {
   const icones: Record<AbaSistema, string> = {
     xml: "⌂",
+    nfseCfop: "⇄",
     validacao: "🛡",
     sped: "▤",
     dominio: "⚖",

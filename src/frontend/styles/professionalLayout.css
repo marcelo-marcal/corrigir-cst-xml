@@ -1293,65 +1293,47 @@ tbody tr:hover {
   margin-top: 22px !important;
 }
 /* =========================================================
-   BOTÃO DE RECOLHER DENTRO DO BRAND BOX
+   BRAND COMO BOTÃO DA SIDEBAR
    ========================================================= */
 
-.brand-box {
-  position: relative !important;
-  padding-right: 36px !important;
+.brand-box-button {
+  width: 100% !important;
+  color: var(--fx-text-main) !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.brand-box-button:hover {
+  border-color: var(--fx-border-strong) !important;
+  background:
+    linear-gradient(135deg, rgba(19, 194, 194, 0.16), rgba(177, 119, 85, 0.08)),
+    var(--fx-bg-card-soft) !important;
+}
+
+.brand-box-button:focus {
+  outline: none !important;
+  border-color: var(--fx-primary) !important;
+  box-shadow: 0 0 0 3px rgba(19, 194, 194, 0.12) !important;
 }
 
 .sidebar-toggle-button {
-  position: absolute !important;
-  top: 50% !important;
-  right: 8px !important;
-  z-index: 10 !important;
-  display: grid !important;
-  place-items: center !important;
-  width: 22px !important;
-  height: 30px !important;
-  border: 1px solid var(--fx-border) !important;
-  border-radius: 8px !important;
-  color: var(--fx-primary) !important;
-  background: rgba(5, 15, 19, 0.86) !important;
-  box-shadow: none !important;
-  font-size: 18px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  transform: translateY(-50%) !important;
+  display: none !important;
 }
 
-.sidebar-toggle-button:hover {
-  border-color: var(--fx-border-strong) !important;
-  background: var(--fx-bg-card-soft) !important;
-}
-
-.sidebar-collapsed .brand-box {
+.sidebar-collapsed .brand-box-button {
   width: 48px !important;
   min-height: 52px !important;
   padding: 7px !important;
   justify-content: center !important;
 }
 
-.sidebar-collapsed .brand-mark {
-  width: 34px !important;
-  height: 34px !important;
-  font-size: 12px !important;
-  border-radius: 10px !important;
+.sidebar-collapsed .brand-box-button:hover {
+  border-color: var(--fx-border-strong) !important;
+  background:
+    linear-gradient(135deg, rgba(19, 194, 194, 0.18), rgba(177, 119, 85, 0.1)),
+    var(--fx-bg-card-soft) !important;
 }
 
-.sidebar-collapsed .sidebar-toggle-button {
-  top: auto !important;
-  right: 50% !important;
-  bottom: -13px !important;
-  width: 22px !important;
-  height: 18px !important;
-  border-radius: 7px !important;
-  font-size: 15px !important;
-  transform: translateX(50%) !important;
-  background: var(--fx-bg-sidebar) !important;
-}
-
-.sidebar-collapsed .sidebar-nav {
-  margin-top: 22px !important;
+.sidebar-collapsed .brand-text {
+  display: none !important;
 }

@@ -12,23 +12,19 @@ export function AppSidebar(props: AppSidebarProps) {
   return (
     <aside className="app-sidebar">
       <div className="sidebar-top">
-        <div className="brand-box">
+        <button
+          type="button"
+          className="brand-box brand-box-button"
+          onClick={props.aoAlternarSidebar}
+          title={props.recolhida ? "Expandir menu" : "Recolher menu"}
+        >
           <div className="brand-mark">FX</div>
 
           <div className="brand-text">
             <strong>Corretor Fiscal</strong>
             <span>Automação XML/SPED</span>
           </div>
-
-          <button
-            type="button"
-            className="sidebar-toggle-button"
-            onClick={props.aoAlternarSidebar}
-            title={props.recolhida ? "Expandir menu" : "Recolher menu"}
-          >
-            {props.recolhida ? "›" : "‹"}
-          </button>
-        </div>
+        </button>
       </div>
 
       <nav className="sidebar-nav">

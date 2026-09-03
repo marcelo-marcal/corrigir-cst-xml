@@ -12,11 +12,12 @@ import type {
   WindowComFileSystemAccessNfse,
 } from "./nfseCfopTypes";
 import {
-  analisarECorrigirNfseCfop,
+  analisarNfseParaSeparacaoQuestor,
   converterFileListParaNfses,
   criarArquivoNfseNaPasta,
   gerarRelatorioNfseCfop,
   listarNfsesRecursivo,
+  montarCaminhoSeparado,
 } from "./nfseCfopUtils";
 
 export function NfseCfopPage() {
@@ -30,19 +31,21 @@ export function NfseCfopPage() {
 
   const [status, setStatus] = useState<StatusExecucaoNfseCfop>("parado");
   const [mensagem, setMensagem] = useState(
-    "Selecione as NFSe, escolha a pasta de saída e execute a correção interestadual.",
+    "Selecione as NFSe, escolha a pasta de saída e separe os lotes para importação no Questor.",
   );
   const [resultados, setResultados] = useState<ResultadoArquivoNfseCfop[]>([]);
   const [progresso, setProgresso] = useState(0);
 
-  const arquivosCorrigidos = resultados.filter((item) => item.corrigido).length;
-  const arquivosInterestaduais = resultados.filter((item) => item.interestadual).length;
+  const arquivosInternos = resultados.filter(
+    (item) => item.categoria === "interna",
+  ).length;
+  const arquivosInterestaduais = resultados.filter(
+    (item) => item.categoria === "interestadual",
+  ).length;
+  const arquivosNaoIdentificados = resultados.filter(
+    (item) => item.categoria === "naoIdentificada",
+  ).length;
   const arquivosComErro = resultados.filter((item) => Boolean(item.erro)).length;
-
-  const totalAlteracoes = resultados.reduce(
-    (total, item) => total + item.ocorrencias,
-    0,
-  );
 
   function selecionarArquivosOrigem(evento: ChangeEvent<HTMLInputElement>): void {
     const arquivos = converterFileListParaNfses(evento.target.files);
@@ -112,7 +115,7 @@ export function NfseCfopPage() {
 
       setPastaDestino(pasta);
       setNomePastaDestino(pasta.name);
-      setMensagem("Pasta de saída selecionada. Você já pode corrigir as NFSe.");
+      setMensagem("Pasta de saída selecionada. Você já pode separar as NFSe.");
     } catch (erro) {
       if (erro instanceof Error && erro.name === "AbortError") {
         return;
@@ -123,7 +126,7 @@ export function NfseCfopPage() {
     }
   }
 
-  async function corrigirNfses(): Promise<void> {
+  async function separarNfses(): Promise<void> {
     if (arquivosSelecionados.length === 0) {
       setStatus("erro");
       setMensagem("Selecione pelo menos um arquivo XML.");
@@ -132,12 +135,12 @@ export function NfseCfopPage() {
 
     if (!pastaDestino) {
       setStatus("erro");
-      setMensagem("Selecione a pasta de saída antes de corrigir.");
+      setMensagem("Selecione a pasta de saída antes de separar.");
       return;
     }
 
     setStatus("processando");
-    setMensagem("Processando NFSe...");
+    setMensagem("Separando NFSe para importação no Questor...");
     setResultados([]);
     setProgresso(0);
 
@@ -148,12 +151,17 @@ export function NfseCfopPage() {
 
       try {
         const conteudoOriginal = await item.arquivo.text();
-        const analise = analisarECorrigirNfseCfop(conteudoOriginal);
+        const analise = analisarNfseParaSeparacaoQuestor(conteudoOriginal);
+
+        const caminhoSeparado = montarCaminhoSeparado({
+          pastaDestino: analise.pastaDestino,
+          caminhoOriginal: item.caminho,
+        });
 
         await criarArquivoNfseNaPasta(
           pastaDestino,
-          item.caminho,
-          analise.conteudoCorrigido,
+          caminhoSeparado,
+          conteudoOriginal,
         );
 
         novosResultados.push({
@@ -162,17 +170,19 @@ export function NfseCfopPage() {
           ufPrestador: analise.ufPrestador,
           ufTomador: analise.ufTomador,
           cMunTomador: analise.cMunTomador,
-          interestadual: analise.interestadual,
-          ocorrencias: analise.ocorrencias,
-          corrigido: analise.corrigido,
+          categoria: analise.categoria,
+          naturezaQuestor: analise.naturezaQuestor,
+          pastaDestino: analise.pastaDestino,
+          copiado: true,
         });
       } catch (erro) {
         novosResultados.push({
           nome: item.nome,
           caminho: item.caminho,
-          interestadual: false,
-          ocorrencias: 0,
-          corrigido: false,
+          categoria: "naoIdentificada",
+          naturezaQuestor: "conferir",
+          pastaDestino: "nao-identificados-conferir",
+          copiado: false,
           erro:
             erro instanceof Error
               ? erro.message
@@ -188,41 +198,46 @@ export function NfseCfopPage() {
       setResultados([...novosResultados]);
     }
 
-    const totalCorrigidos = novosResultados.filter((item) => item.corrigido).length;
-    const totalMudancas = novosResultados.reduce(
-      (total, item) => total + item.ocorrencias,
-      0,
-    );
+    const totalInternos = novosResultados.filter(
+      (item) => item.categoria === "interna",
+    ).length;
+    const totalInterestaduais = novosResultados.filter(
+      (item) => item.categoria === "interestadual",
+    ).length;
+    const totalNaoIdentificados = novosResultados.filter(
+      (item) => item.categoria === "naoIdentificada",
+    ).length;
 
     const relatorio = gerarRelatorioNfseCfop({
       arquivosSelecionados: arquivosSelecionados.length,
-      arquivosCorrigidos: totalCorrigidos,
-      totalAlteracoes: totalMudancas,
+      arquivosInternos: totalInternos,
+      arquivosInterestaduais: totalInterestaduais,
+      arquivosNaoIdentificados: totalNaoIdentificados,
       resultados: novosResultados,
     });
 
     await criarArquivoNfseNaPasta(
       pastaDestino,
-      "relatorio-nfse-cfop-interestadual.txt",
+      "relatorio-separacao-nfse-questor.txt",
       relatorio,
     );
 
     setStatus("concluido");
     setMensagem(
-      `Concluído. ${totalCorrigidos} arquivo(s) corrigido(s), ${totalMudancas} alteração(ões) realizada(s).`,
+      `Concluído. ${totalInternos} interna(s), ${totalInterestaduais} interestadual(is), ${totalNaoIdentificados} para conferência.`,
     );
   }
 
   return (
     <div className="xml-correcao-page nfse-cfop-page">
       <FxPageHeader
-        eyebrow="NFSe CFOP Interestadual"
-        titulo="Correção de 5.xxx.xxx para 6.xxx.xxx"
-        descricao="Quando a UF do prestador for diferente da UF do tomador identificada pelo cMun, o sistema altera códigos no padrão 5.xxx.xxx para 6.xxx.xxx."
+        eyebrow="NFSe Questor"
+        titulo="Separador de XML por Natureza"
+        descricao="O sistema lê a UF do prestador e identifica a UF do tomador pelo cMun. Depois separa os XMLs em pastas próprias para importar no Questor com Natureza 5.933.004 ou 6.933.004."
       >
         <div className={`status-pill status-${status}`}>
           {status === "parado" && "Aguardando"}
-          {status === "processando" && "Processando"}
+          {status === "processando" && "Separando"}
           {status === "concluido" && "Concluído"}
           {status === "erro" && "Atenção"}
         </div>
@@ -230,23 +245,26 @@ export function NfseCfopPage() {
 
       <section className="filter-panel nfse-rule-panel">
         <div className="summary-block nfse-rule-card">
-          <span>Regra de localização</span>
+          <span>XML interno</span>
           <p>
-            Prestador: <strong>&lt;emit&gt; &gt; &lt;enderNac&gt; &gt; &lt;UF&gt;</strong>
+            Prestador e tomador na mesma UF:
+            <strong> importar com 5.933.004</strong>
           </p>
         </div>
 
         <div className="summary-block nfse-rule-card">
-          <span>Regra do tomador</span>
+          <span>XML interestadual</span>
           <p>
-            Tomador: <strong>&lt;toma&gt; &gt; &lt;end&gt; &gt; &lt;endNac&gt; &gt; &lt;cMun&gt;</strong>
+            Prestador e tomador em UFs diferentes:
+            <strong> importar com 6.933.004</strong>
           </p>
         </div>
 
         <div className="summary-block nfse-rule-card">
-          <span>Correção</span>
+          <span>Saída</span>
           <p>
-            Se for interestadual: <strong>5.xxx.xxx → 6.xxx.xxx</strong>
+            O XML não é alterado. Ele é apenas copiado para a pasta correta de
+            importação.
           </p>
         </div>
       </section>
@@ -294,17 +312,17 @@ export function NfseCfopPage() {
 
         <FxStepCard
           numero={3}
-          titulo="Corrigir NFSe"
+          titulo="Separar XMLs"
           descricao={mensagem}
           icone="🛠"
         >
           <button
             type="button"
             className="primary-button"
-            onClick={corrigirNfses}
+            onClick={separarNfses}
             disabled={status === "processando"}
           >
-            {status === "processando" ? "Corrigindo..." : "Corrigir NFSe"}
+            {status === "processando" ? "Separando..." : "Separar NFSe"}
           </button>
         </FxStepCard>
       </section>
@@ -313,41 +331,33 @@ export function NfseCfopPage() {
         <FxKpiCard
           valor={arquivosSelecionados.length}
           titulo="Arquivos selecionados"
-          descricao="Total de XMLs carregados para análise."
+          descricao="Total de XMLs carregados para separação."
           icone="▤"
           variante="orange"
         />
 
         <FxKpiCard
+          valor={arquivosInternos}
+          titulo="Internas"
+          descricao="Importar no Questor com Natureza 5.933.004."
+          icone="⌂"
+          variante="teal"
+        />
+
+        <FxKpiCard
           valor={arquivosInterestaduais}
           titulo="Interestaduais"
-          descricao="NFSe com UF do tomador diferente do prestador."
-          icone="⚖"
+          descricao="Importar no Questor com Natureza 6.933.004."
+          icone="⇄"
           variante="blue"
         />
 
         <FxKpiCard
-          valor={arquivosCorrigidos}
-          titulo="Arquivos corrigidos"
-          descricao="XMLs gravados com alteração na pasta de saída."
-          icone="✓"
-          variante="teal"
-        />
-
-        <FxKpiCard
-          valor={arquivosComErro}
-          titulo="Arquivos com erro"
-          descricao="Falhas encontradas durante o processamento."
+          valor={arquivosComErro + arquivosNaoIdentificados}
+          titulo="Conferir"
+          descricao="Arquivos com erro ou sem identificação completa."
           icone="⚠"
           variante="purple"
-        />
-
-        <FxKpiCard
-          valor={totalAlteracoes}
-          titulo="Alterações feitas"
-          descricao="Total de códigos 5.xxx.xxx alterados."
-          icone="⇄"
-          variante="teal"
         />
       </section>
 
@@ -369,7 +379,7 @@ export function NfseCfopPage() {
           <div className="panel-header">
             <div>
               <p className="eyebrow">Resultado</p>
-              <h3>NFSe processadas</h3>
+              <h3>NFSe separadas para o Questor</h3>
             </div>
           </div>
 
@@ -381,7 +391,8 @@ export function NfseCfopPage() {
                   <th>Prestador</th>
                   <th>Tomador</th>
                   <th>cMun</th>
-                  <th>Alterações</th>
+                  <th>Natureza</th>
+                  <th>Pasta</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -389,7 +400,7 @@ export function NfseCfopPage() {
               <tbody>
                 {resultados.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="empty-cell">
+                    <td colSpan={7} className="empty-cell">
                       Nenhum processamento executado ainda.
                     </td>
                   </tr>
@@ -400,16 +411,19 @@ export function NfseCfopPage() {
                       <td>{resultado.ufPrestador ?? "-"}</td>
                       <td>{resultado.ufTomador ?? "-"}</td>
                       <td>{resultado.cMunTomador ?? "-"}</td>
-                      <td>{resultado.ocorrencias}</td>
+                      <td>{resultado.naturezaQuestor}</td>
+                      <td>{resultado.pastaDestino}</td>
                       <td>
                         {resultado.erro ? (
                           <span className="badge badge-error">Erro</span>
-                        ) : resultado.corrigido ? (
-                          <span className="badge badge-success">Corrigido</span>
-                        ) : resultado.interestadual ? (
-                          <span className="badge badge-muted">Sem código 5</span>
+                        ) : resultado.categoria === "interna" ? (
+                          <span className="badge badge-success">Interna</span>
+                        ) : resultado.categoria === "interestadual" ? (
+                          <span className="badge badge-success">
+                            Interestadual
+                          </span>
                         ) : (
-                          <span className="badge badge-muted">Operação interna</span>
+                          <span className="badge badge-muted">Conferir</span>
                         )}
                       </td>
                     </tr>
@@ -422,28 +436,37 @@ export function NfseCfopPage() {
 
         <aside className="summary-panel">
           <p className="eyebrow">Resumo técnico</p>
-          <h3>Regra aplicada</h3>
+          <h3>Como importar</h3>
 
           <div className="summary-block">
-            <span>Prestador</span>
-            <p>Busca a UF dentro de emit &gt; enderNac &gt; UF.</p>
-          </div>
-
-          <div className="summary-block">
-            <span>Tomador</span>
-            <p>Identifica a UF pelos dois primeiros dígitos do cMun do tomador.</p>
-          </div>
-
-          <div className="summary-block">
-            <span>Correção</span>
-            <p>Quando for interestadual, altera 5.xxx.xxx para 6.xxx.xxx.</p>
-          </div>
-
-          <div className="summary-block">
-            <span>Assinatura</span>
+            <span>Pasta interna</span>
             <p>
-              XML assinado pode ter a assinatura invalidada após alteração de
-              conteúdo.
+              Importe <strong>internas-5-933-004</strong> no Questor usando
+              Natureza <strong>5.933.004</strong>.
+            </p>
+          </div>
+
+          <div className="summary-block">
+            <span>Pasta interestadual</span>
+            <p>
+              Importe <strong>interestaduais-6-933-004</strong> no Questor usando
+              Natureza <strong>6.933.004</strong>.
+            </p>
+          </div>
+
+          <div className="summary-block">
+            <span>Conferência</span>
+            <p>
+              Arquivos sem UF do prestador ou sem cMun do tomador vão para
+              <strong> nao-identificados-conferir</strong>.
+            </p>
+          </div>
+
+          <div className="summary-block">
+            <span>Segurança</span>
+            <p>
+              O XML original não é alterado. O sistema apenas copia cada arquivo
+              para a pasta correta.
             </p>
           </div>
         </aside>

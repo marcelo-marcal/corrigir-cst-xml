@@ -26,8 +26,8 @@ const ABAS: ItemMenuSistema[] = [
   },
   {
     id: "nfseCfop",
-    titulo: "NFSe CFOP",
-    subtitulo: "5.xxx.xxx para 6.xxx.xxx",
+    titulo: "NFSe Questor",
+    subtitulo: "Separar 5.933 / 6.933",
     icone: obterIconeAba("nfseCfop"),
   },
   {

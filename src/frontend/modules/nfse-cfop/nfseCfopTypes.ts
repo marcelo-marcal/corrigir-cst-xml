@@ -1,5 +1,10 @@
 export type StatusExecucaoNfseCfop = "parado" | "processando" | "concluido" | "erro";
 
+export type CategoriaSeparacaoNfse =
+  | "interna"
+  | "interestadual"
+  | "naoIdentificada";
+
 export type ArquivoNfseSelecionado = {
   nome: string;
   caminho: string;
@@ -12,9 +17,10 @@ export type ResultadoArquivoNfseCfop = {
   ufPrestador?: string;
   ufTomador?: string;
   cMunTomador?: string;
-  interestadual: boolean;
-  ocorrencias: number;
-  corrigido: boolean;
+  categoria: CategoriaSeparacaoNfse;
+  naturezaQuestor: "5.933.004" | "6.933.004" | "conferir";
+  pastaDestino: string;
+  copiado: boolean;
   erro?: string;
 };
 

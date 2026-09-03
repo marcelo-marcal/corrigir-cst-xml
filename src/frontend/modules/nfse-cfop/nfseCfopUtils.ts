@@ -1,5 +1,6 @@
 import type {
   ArquivoNfseSelecionado,
+  CategoriaSeparacaoNfse,
   FileSystemDirectoryHandleNfseFx,
   ResultadoArquivoNfseCfop,
 } from "./nfseCfopTypes";
@@ -33,6 +34,10 @@ const UF_POR_PREFIXO_IBGE: Record<string, string> = {
   "52": "GO",
   "53": "DF",
 };
+
+const PASTA_INTERNAS = "internas-5-933-004";
+const PASTA_INTERESTADUAIS = "interestaduais-6-933-004";
+const PASTA_NAO_IDENTIFICADAS = "nao-identificados-conferir";
 
 export function converterFileListParaNfses(
   fileList: FileList | null,
@@ -132,90 +137,107 @@ export function obterUfTomadorPorCodigoMunicipio(
   return UF_POR_PREFIXO_IBGE[prefixo];
 }
 
-export function verificarSeOperacaoInterestadual(params: {
+export function classificarNfseParaQuestor(params: {
   ufPrestador?: string;
   ufTomador?: string;
-}): boolean {
+}): {
+  categoria: CategoriaSeparacaoNfse;
+  naturezaQuestor: "5.933.004" | "6.933.004" | "conferir";
+  pastaDestino: string;
+} {
   if (!params.ufPrestador || !params.ufTomador) {
-    return false;
+    return {
+      categoria: "naoIdentificada",
+      naturezaQuestor: "conferir",
+      pastaDestino: PASTA_NAO_IDENTIFICADAS,
+    };
   }
 
-  return params.ufPrestador.toUpperCase() !== params.ufTomador.toUpperCase();
+  if (params.ufPrestador.toUpperCase() === params.ufTomador.toUpperCase()) {
+    return {
+      categoria: "interna",
+      naturezaQuestor: "5.933.004",
+      pastaDestino: PASTA_INTERNAS,
+    };
+  }
+
+  return {
+    categoria: "interestadual",
+    naturezaQuestor: "6.933.004",
+    pastaDestino: PASTA_INTERESTADUAIS,
+  };
 }
 
-export function contarCodigosNaturezaIniciandoCom5(conteudoXml: string): number {
-  const ocorrencias = conteudoXml.match(/\b5\.\d{3}\.\d{3}\b/g);
-  return ocorrencias?.length ?? 0;
-}
-
-export function corrigirNaturezaCfopInterestadual(conteudoXml: string): string {
-  return conteudoXml.replace(/\b5(\.\d{3}\.\d{3})\b/g, "6$1");
-}
-
-export function analisarECorrigirNfseCfop(conteudoXml: string): {
-  conteudoCorrigido: string;
+export function analisarNfseParaSeparacaoQuestor(conteudoXml: string): {
   ufPrestador?: string;
   ufTomador?: string;
   cMunTomador?: string;
-  interestadual: boolean;
-  ocorrencias: number;
-  corrigido: boolean;
+  categoria: CategoriaSeparacaoNfse;
+  naturezaQuestor: "5.933.004" | "6.933.004" | "conferir";
+  pastaDestino: string;
 } {
   const ufPrestador = obterUfPrestador(conteudoXml);
   const cMunTomador = obterCodigoMunicipioTomador(conteudoXml);
   const ufTomador = obterUfTomadorPorCodigoMunicipio(cMunTomador);
 
-  const interestadual = verificarSeOperacaoInterestadual({
+  const classificacao = classificarNfseParaQuestor({
     ufPrestador,
     ufTomador,
   });
 
-  if (!interestadual) {
-    return {
-      conteudoCorrigido: conteudoXml,
-      ufPrestador,
-      ufTomador,
-      cMunTomador,
-      interestadual,
-      ocorrencias: 0,
-      corrigido: false,
-    };
-  }
-
-  const ocorrencias = contarCodigosNaturezaIniciandoCom5(conteudoXml);
-  const conteudoCorrigido =
-    ocorrencias > 0 ? corrigirNaturezaCfopInterestadual(conteudoXml) : conteudoXml;
-
   return {
-    conteudoCorrigido,
     ufPrestador,
     ufTomador,
     cMunTomador,
-    interestadual,
-    ocorrencias,
-    corrigido: ocorrencias > 0,
+    categoria: classificacao.categoria,
+    naturezaQuestor: classificacao.naturezaQuestor,
+    pastaDestino: classificacao.pastaDestino,
   };
+}
+
+export function montarCaminhoSeparado(params: {
+  pastaDestino: string;
+  caminhoOriginal: string;
+}): string {
+  return `${params.pastaDestino}/${params.caminhoOriginal}`;
 }
 
 export function gerarRelatorioNfseCfop(params: {
   arquivosSelecionados: number;
-  arquivosCorrigidos: number;
-  totalAlteracoes: number;
+  arquivosInternos: number;
+  arquivosInterestaduais: number;
+  arquivosNaoIdentificados: number;
   resultados: ResultadoArquivoNfseCfop[];
 }): string {
   const linhas: string[] = [];
 
   linhas.push("CORRETOR FISCAL FX");
-  linhas.push("Relatório de Correção NFSe - CFOP/Natureza Interestadual");
+  linhas.push("Relatório de Separação NFSe para Importação no Questor");
+  linhas.push("");
+  linhas.push("Objetivo:");
+  linhas.push(
+    "Separar automaticamente XMLs de NFSe em lotes internos e interestaduais antes da importação no Questor.",
+  );
   linhas.push("");
   linhas.push("Regra aplicada:");
   linhas.push(
-    "Quando a UF do prestador for diferente da UF identificada pelo cMun do tomador, códigos no padrão 5.xxx.xxx são alterados para 6.xxx.xxx.",
+    "Quando a UF do prestador for igual à UF do tomador, o XML é separado para importação com Natureza 5.933.004.",
+  );
+  linhas.push(
+    "Quando a UF do prestador for diferente da UF do tomador, o XML é separado para importação com Natureza 6.933.004.",
   );
   linhas.push("");
   linhas.push(`Arquivos analisados: ${params.arquivosSelecionados}`);
-  linhas.push(`Arquivos corrigidos: ${params.arquivosCorrigidos}`);
-  linhas.push(`Total de alterações: ${params.totalAlteracoes}`);
+  linhas.push(`Arquivos internos - Natureza 5.933.004: ${params.arquivosInternos}`);
+  linhas.push(
+    `Arquivos interestaduais - Natureza 6.933.004: ${params.arquivosInterestaduais}`,
+  );
+  linhas.push(`Arquivos não identificados: ${params.arquivosNaoIdentificados}`);
+  linhas.push("");
+  linhas.push("Pastas geradas:");
+  linhas.push(`- ${PASTA_INTERNAS}`);
+  linhas.push(`- ${PASTA_INTERESTADUAIS}`);
+  linhas.push(`- ${PASTA_NAO_IDENTIFICADAS}`);
   linhas.push("");
   linhas.push("Detalhamento:");
   linhas.push("");
@@ -230,30 +252,35 @@ export function gerarRelatorioNfseCfop(params: {
       resultado.ufTomador ?? "-"
     } / cMun ${resultado.cMunTomador ?? "-"}`;
 
-    if (!resultado.interestadual) {
-      linhas.push(`[SEM ALTERAÇÃO] ${resultado.caminho} - Operação interna - ${localizacao}`);
+    if (resultado.categoria === "interna") {
+      linhas.push(
+        `[INTERNA] ${resultado.caminho} -> ${resultado.pastaDestino} - Natureza Questor ${resultado.naturezaQuestor} - ${localizacao}`,
+      );
       continue;
     }
 
-    if (resultado.corrigido) {
+    if (resultado.categoria === "interestadual") {
       linhas.push(
-        `[CORRIGIDO] ${resultado.caminho} - ${resultado.ocorrencias} alteração(ões) - ${localizacao}`,
+        `[INTERESTADUAL] ${resultado.caminho} -> ${resultado.pastaDestino} - Natureza Questor ${resultado.naturezaQuestor} - ${localizacao}`,
       );
       continue;
     }
 
     linhas.push(
-      `[SEM CÓDIGO 5.xxx.xxx] ${resultado.caminho} - Operação interestadual, mas nenhum código 5.xxx.xxx foi encontrado - ${localizacao}`,
+      `[CONFERIR] ${resultado.caminho} -> ${resultado.pastaDestino} - Não foi possível identificar UF do prestador ou UF do tomador - ${localizacao}`,
     );
   }
 
   linhas.push("");
   linhas.push("Observação:");
   linhas.push(
-    "Os arquivos originais não foram sobrescritos. Os XMLs corrigidos foram gravados na pasta de saída selecionada.",
+    "Os XMLs originais não foram alterados. O sistema apenas copiou cada arquivo para a pasta correta de importação.",
   );
   linhas.push(
-    "Atenção: XML assinado digitalmente pode ter a assinatura invalidada após qualquer alteração no conteúdo.",
+    "Após a separação, importe a pasta internas-5-933-004 no Questor usando Natureza 5.933.004.",
+  );
+  linhas.push(
+    "Depois importe a pasta interestaduais-6-933-004 no Questor usando Natureza 6.933.004.",
   );
 
   return linhas.join("\n");

@@ -12,18 +12,18 @@ export type ArquivoNfseSelecionado = {
 };
 
 export type ResultadoArquivoNfseCfop = {
-  nome: string;
-  caminho: string;
-  ufPrestador?: string;
-  ufLocalPrestacao?: string;
-  cLocPrestacao?: string;
-  ufTomador?: string;
-  cMunTomador?: string;
-  categoria: CategoriaSeparacaoNfse;
-  naturezaQuestor: "5.933.004" | "6.933.004" | "conferir";
-  pastaDestino: string;
-  copiado: boolean;
-  erro?: string;
+    nome: string;
+    caminho: string;
+    ufPrestador?: string;
+    ufLocalPrestacao?: string;
+    cLocPrestacao?: string;
+    ufTomador?: string;
+    cMunTomador?: string;
+    categoria: CategoriaSeparacaoNfse;
+    naturezaQuestor: "5.933.004" | "6.933.004" | "conferir";
+    pastaDestino: string;
+    copiado: boolean;
+    erro?: string;
 };
 
 export type FileSystemFileHandleNfseFx = {

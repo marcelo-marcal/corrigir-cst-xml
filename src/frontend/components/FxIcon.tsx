@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 type FxIconProps = {
   arquivo?: string;
   textoAlternativo: string;
@@ -6,7 +8,9 @@ type FxIconProps = {
 };
 
 export function FxIcon(props: FxIconProps) {
-  if (!props.arquivo) {
+  const [erroImagem, setErroImagem] = useState(false);
+
+  if (!props.arquivo || erroImagem) {
     return <span className={props.className}>{props.fallback}</span>;
   }
 
@@ -15,9 +19,8 @@ export function FxIcon(props: FxIconProps) {
       className={props.className}
       src={`/icons/${props.arquivo}`}
       alt={props.textoAlternativo}
-      onError={(evento) => {
-        evento.currentTarget.style.display = "none";
-      }}
+      draggable={false}
+      onError={() => setErroImagem(true)}
     />
   );
 }

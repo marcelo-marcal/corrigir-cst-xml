@@ -101,9 +101,7 @@ button:disabled {
   display: flex;
   width: 100%;
   height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(19, 194, 194, 0.1), transparent 28%),
-    var(--fx-bg-main);
+  background: var(--fx-bg-main);
   color: var(--fx-text-main);
 }
 
@@ -122,6 +120,7 @@ button:disabled {
 }
 
 .brand-box {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -129,10 +128,26 @@ button:disabled {
   padding: 10px;
   border: 1px solid var(--fx-border);
   border-radius: var(--fx-radius-xl);
-  background:
-    linear-gradient(135deg, rgba(19, 194, 194, 0.1), rgba(177, 119, 85, 0.06)),
-    var(--fx-bg-card);
+  background: var(--fx-bg-card);
   box-shadow: var(--fx-shadow-soft);
+}
+
+.brand-box-button {
+  width: 100%;
+  color: var(--fx-text-main);
+  text-align: left;
+  cursor: pointer;
+}
+
+.brand-box-button:hover {
+  border-color: var(--fx-border-strong);
+  background: var(--fx-bg-card-soft);
+}
+
+.brand-box-button:focus {
+  outline: none;
+  border-color: var(--fx-primary);
+  box-shadow: 0 0 0 3px rgba(19, 194, 194, 0.12);
 }
 
 .brand-mark {
@@ -142,10 +157,14 @@ button:disabled {
   height: 38px;
   border-radius: var(--fx-radius-lg);
   color: #051215;
-  background: linear-gradient(135deg, var(--fx-primary), var(--fx-brand-copper-soft));
+  background: var(--fx-primary);
   font-size: 14px;
   font-weight: 950;
   letter-spacing: -0.06em;
+}
+
+.brand-box-button:hover .brand-mark {
+  background: var(--fx-primary-dark);
 }
 
 .brand-text {
@@ -166,29 +185,7 @@ button:disabled {
 }
 
 .sidebar-toggle-button {
-  position: absolute;
-  top: 50%;
-  right: -25px;
-  z-index: 20;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 38px;
-  border: 1px solid var(--fx-border);
-  border-left: 0;
-  border-radius: 0 9px 9px 0;
-  color: var(--fx-primary);
-  background: var(--fx-bg-sidebar);
-  box-shadow: none;
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1;
-  transform: translateY(-50%);
-}
-
-.sidebar-toggle-button:hover {
-  border-color: var(--fx-border-strong);
-  background: var(--fx-bg-card-soft);
+  display: none;
 }
 
 .sidebar-nav {
@@ -225,9 +222,7 @@ button:disabled {
 
 .sidebar-item.active {
   border-color: var(--fx-border-strong);
-  background:
-    linear-gradient(135deg, rgba(19, 194, 194, 0.18), rgba(19, 194, 194, 0.07)),
-    var(--fx-bg-card-soft);
+  background: rgba(19, 194, 194, 0.13);
   color: var(--fx-text-main);
   box-shadow: inset 4px 0 0 var(--fx-primary);
 }
@@ -245,7 +240,11 @@ button:disabled {
 
 .sidebar-item.active .sidebar-icon {
   color: #061817;
-  background: linear-gradient(135deg, var(--fx-primary), var(--fx-brand-copper-soft));
+  background: var(--fx-primary);
+}
+
+.sidebar-item.active:hover .sidebar-icon {
+  background: var(--fx-primary-dark);
 }
 
 .sidebar-label {
@@ -283,15 +282,11 @@ button:disabled {
   gap: 16px;
   padding: 9px 26px;
   border-bottom: 1px solid var(--fx-border);
-  background:
-    linear-gradient(90deg, rgba(19, 194, 194, 0.06), transparent 38%),
-    rgba(7, 19, 23, 0.3);
+  background: rgba(7, 19, 23, 0.3);
 }
 
 .theme-light .app-header {
-  background:
-    linear-gradient(90deg, rgba(19, 194, 194, 0.1), transparent 38%),
-    rgba(238, 231, 222, 0.38);
+  background: rgba(238, 231, 222, 0.38);
 }
 
 .app-header h1 {
@@ -374,9 +369,7 @@ button:disabled {
   padding: 18px 22px;
   border: 1px solid var(--fx-border);
   border-radius: var(--fx-radius-xl);
-  background:
-    linear-gradient(135deg, rgba(19, 194, 194, 0.1), rgba(177, 119, 85, 0.03)),
-    var(--fx-bg-card);
+  background: var(--fx-bg-card);
   box-shadow: var(--fx-shadow);
   position: relative;
   overflow: hidden;
@@ -453,6 +446,14 @@ button:disabled {
   border-radius: var(--fx-radius-xl);
   background: var(--fx-bg-card);
   box-shadow: var(--fx-shadow-soft);
+}
+
+.nfse-rule-panel {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.nfse-rule-panel .summary-block {
+  margin-top: 0;
 }
 
 .field-group {
@@ -543,8 +544,12 @@ button:disabled {
   height: 42px;
   border-radius: var(--fx-radius-lg);
   color: #061817;
-  background: linear-gradient(135deg, var(--fx-primary), var(--fx-brand-copper-soft));
+  background: var(--fx-primary);
   font-size: 17px;
+}
+
+.step-card:hover .step-icon {
+  background: var(--fx-primary-dark);
 }
 
 .step-card strong {
@@ -585,12 +590,12 @@ button:disabled {
 .primary-button {
   border: 1px solid var(--fx-primary-dark);
   color: #061817;
-  background: linear-gradient(135deg, var(--fx-primary), var(--fx-brand-copper-soft));
+  background: var(--fx-primary);
   box-shadow: 0 8px 16px rgba(19, 194, 194, 0.12);
 }
 
 .primary-button:hover {
-  filter: brightness(1.04);
+  background: var(--fx-primary-dark);
 }
 
 .secondary-button {
@@ -694,6 +699,13 @@ button:disabled {
   z-index: 1;
 }
 
+.kpi-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
+
 .kpi-orange .kpi-icon {
   color: var(--fx-kpi-orange);
   background: rgba(255, 111, 0, 0.1);
@@ -791,7 +803,7 @@ button:disabled {
 .progress-bar div {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--fx-primary), var(--fx-brand-copper-soft));
+  background: var(--fx-primary);
   transition: width 0.18s ease;
 }
 
@@ -828,7 +840,7 @@ button:disabled {
   gap: 14px;
   padding: 13px 18px;
   border-bottom: 1px solid var(--fx-border);
-  background: linear-gradient(90deg, var(--fx-card-highlight), transparent);
+  background: var(--fx-card-highlight);
 }
 
 .panel-header h3,
@@ -897,7 +909,7 @@ tbody tr:hover {
 
 .badge-success {
   color: #061817;
-  background: var(--fx-primary);
+  background: var(--fx-kpi-teal);
 }
 
 .badge-error {
@@ -1020,8 +1032,7 @@ tbody tr:hover {
 .app-main,
 .brand-text,
 .sidebar-label,
-.sidebar-item,
-.sidebar-toggle-button {
+.sidebar-item {
   transition:
     width 0.16s ease,
     flex-basis 0.16s ease,
@@ -1032,7 +1043,7 @@ tbody tr:hover {
 }
 
 .app-shell.sidebar-collapsed {
-  --fx-sidebar-width: 72px;
+  --fx-sidebar-width: 70px;
 }
 
 .sidebar-collapsed .app-sidebar {
@@ -1040,12 +1051,23 @@ tbody tr:hover {
   padding-right: 10px;
 }
 
-.sidebar-collapsed .brand-box {
+.sidebar-collapsed .brand-box-button {
+  width: 48px;
+  min-height: 52px;
+  padding: 7px;
   justify-content: center;
-  padding: 9px 7px;
 }
 
-.sidebar-collapsed .brand-text {
+.sidebar-collapsed .brand-mark {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+
+.sidebar-collapsed .brand-text,
+.sidebar-collapsed .sidebar-label {
+  display: none;
   width: 0;
   opacity: 0;
   overflow: hidden;
@@ -1053,35 +1075,39 @@ tbody tr:hover {
 }
 
 .sidebar-collapsed .sidebar-nav {
+  gap: 10px;
+  margin-top: 16px;
   align-items: center;
 }
 
 .sidebar-collapsed .sidebar-item {
-  grid-template-columns: 36px;
+  display: grid;
+  grid-template-columns: 34px;
+  grid-template-rows: 34px;
+  place-items: center;
   justify-content: center;
   width: 48px;
+  height: 48px;
   min-height: 48px;
-  padding: 6px;
+  max-height: 48px;
+  padding: 7px;
+  border-radius: 12px;
 }
 
 .sidebar-collapsed .sidebar-item:hover {
   transform: translateX(0);
 }
 
+.sidebar-collapsed .sidebar-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
 .sidebar-collapsed .sidebar-item.active {
-  box-shadow: inset 0 -4px 0 var(--fx-primary);
-}
-
-.sidebar-collapsed .sidebar-label {
-  width: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.sidebar-collapsed .sidebar-toggle-button {
-  right: -23px;
-  color: var(--fx-brand-copper-soft);
+  border-color: var(--fx-border-strong);
+  box-shadow: inset 3px 0 0 var(--fx-primary);
 }
 
 @media (max-width: 1180px) {
@@ -1120,10 +1146,6 @@ tbody tr:hover {
     height: auto;
   }
 
-  .sidebar-toggle-button {
-    display: none;
-  }
-
   .sidebar-nav {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1143,6 +1165,7 @@ tbody tr:hover {
   }
 
   .filter-panel,
+  .nfse-rule-panel,
   .stepper-grid,
   .kpi-grid {
     grid-template-columns: 1fr;
@@ -1157,183 +1180,270 @@ tbody tr:hover {
     padding: 6px 12px;
   }
 }
+
+.step-icon-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
 /* =========================================================
-   CORREÇÃO FINAL DA SIDEBAR RECOLHIDA
+   AJUSTE FINAL DOS ÍCONES PNG
    ========================================================= */
 
-.sidebar-collapsed .brand-text,
-.sidebar-collapsed .sidebar-label {
-  display: none !important;
-}
-
-.sidebar-collapsed .brand-box {
-  width: 48px !important;
-  min-height: 52px !important;
-  padding: 7px !important;
-  justify-content: center !important;
-}
-
-.sidebar-collapsed .brand-mark {
-  width: 34px !important;
-  height: 34px !important;
-  font-size: 12px !important;
-  border-radius: 10px !important;
-}
-
-.sidebar-collapsed .sidebar-nav {
-  gap: 10px !important;
-  margin-top: 16px !important;
-  align-items: center !important;
-}
-
-.sidebar-collapsed .sidebar-item {
+.sidebar-icon,
+.step-icon,
+.kpi-icon {
   display: grid !important;
-  grid-template-columns: 34px !important;
-  grid-template-rows: 34px !important;
   place-items: center !important;
-  width: 48px !important;
-  height: 48px !important;
-  min-height: 48px !important;
-  max-height: 48px !important;
-  padding: 7px !important;
-  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.sidebar-icon-img {
+  display: block !important;
+  width: 28px !important;
+  height: 28px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.step-icon-img {
+  display: block !important;
+  width: 32px !important;
+  height: 32px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.kpi-icon-img {
+  display: block !important;
+  width: 30px !important;
+  height: 30px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.sidebar-collapsed .sidebar-icon-img {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+/* =========================================================
+   PADRÃO FERRES - ÍCONES PNG CENTRALIZADOS
+   ========================================================= */
+
+:root {
+  --fx-sidebar-icon-slot-size: 36px;
+  --fx-sidebar-icon-size: 30px;
+
+  --fx-step-icon-slot-size: 42px;
+  --fx-step-icon-size: 34px;
+
+  --fx-kpi-icon-slot-size: 40px;
+  --fx-kpi-icon-size: 32px;
+}
+
+.sidebar-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: var(--fx-sidebar-icon-slot-size) !important;
+  height: var(--fx-sidebar-icon-slot-size) !important;
+  min-width: var(--fx-sidebar-icon-slot-size) !important;
+  min-height: var(--fx-sidebar-icon-slot-size) !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.step-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: var(--fx-step-icon-slot-size) !important;
+  height: var(--fx-step-icon-slot-size) !important;
+  min-width: var(--fx-step-icon-slot-size) !important;
+  min-height: var(--fx-step-icon-slot-size) !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.kpi-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: var(--fx-kpi-icon-slot-size) !important;
+  height: var(--fx-kpi-icon-slot-size) !important;
+  min-width: var(--fx-kpi-icon-slot-size) !important;
+  min-height: var(--fx-kpi-icon-slot-size) !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.sidebar-icon-img {
+  display: block !important;
+  width: var(--fx-sidebar-icon-size) !important;
+  height: var(--fx-sidebar-icon-size) !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform-origin: center !important;
+}
+
+.step-icon-img {
+  display: block !important;
+  width: var(--fx-step-icon-size) !important;
+  height: var(--fx-step-icon-size) !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform-origin: center !important;
+}
+
+.kpi-icon-img {
+  display: block !important;
+  width: var(--fx-kpi-icon-size) !important;
+  height: var(--fx-kpi-icon-size) !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform-origin: center !important;
 }
 
 .sidebar-collapsed .sidebar-icon {
   width: 34px !important;
   height: 34px !important;
-  border-radius: 10px !important;
-  font-size: 14px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
 }
 
-.sidebar-collapsed .sidebar-item.active {
-  border-color: var(--fx-border-strong) !important;
-  box-shadow: inset 3px 0 0 var(--fx-primary) !important;
+.sidebar-collapsed .sidebar-icon-img {
+  width: 29px !important;
+  height: 29px !important;
 }
 
-.sidebar-collapsed .sidebar-toggle-button {
-  top: 44px !important;
-  right: -18px !important;
-  width: 18px !important;
-  height: 32px !important;
-  border-radius: 0 8px 8px 0 !important;
-  font-size: 16px !important;
-  background: var(--fx-bg-sidebar) !important;
+/* Compensação para PNGs que têm margem transparente interna */
+.sidebar-icon-img[src*="chave-inglesa"],
+.step-icon-img[src*="chave-inglesa"],
+.kpi-icon-img[src*="chave-inglesa"] {
+  transform: scale(1.18) !important;
 }
 
-.sidebar-collapsed .app-sidebar {
-  padding-left: 10px !important;
-  padding-right: 10px !important;
+.sidebar-icon-img[src*="arquivo-xml"],
+.step-icon-img[src*="arquivo-xml"],
+.kpi-icon-img[src*="arquivo-xml"] {
+  transform: scale(1.12) !important;
 }
 
-.app-shell.sidebar-collapsed {
-  --fx-sidebar-width: 70px !important;
+.sidebar-icon-img[src*="atencao"],
+.step-icon-img[src*="atencao"],
+.kpi-icon-img[src*="atencao"] {
+  transform: scale(1.08) !important;
 }
+
+.sidebar-icon-img[src*="esquerda-direita"],
+.step-icon-img[src*="esquerda-direita"],
+.kpi-icon-img[src*="esquerda-direita"] {
+  transform: scale(1.15) !important;
+}
+
 /* =========================================================
-   BOTÃO DE RECOLHER DENTRO DO BRAND BOX
+   PADRONIZAÇÃO VISUAL DOS ÍCONES DA DASHBOARD
    ========================================================= */
 
-.brand-box {
-  position: relative !important;
-  padding-right: 36px !important;
+/* Caixa fixa dos ícones */
+.step-icon,
+.kpi-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
 }
 
-.sidebar-toggle-button {
-  position: absolute !important;
-  top: 50% !important;
-  right: 8px !important;
-  z-index: 10 !important;
-  display: grid !important;
-  place-items: center !important;
-  width: 22px !important;
+/* Tamanho base igual para todos */
+.step-icon-img,
+.kpi-icon-img {
+  display: block !important;
+  width: 30px !important;
   height: 30px !important;
-  border: 1px solid var(--fx-border) !important;
-  border-radius: 8px !important;
-  color: var(--fx-primary) !important;
-  background: rgba(5, 15, 19, 0.86) !important;
-  box-shadow: none !important;
-  font-size: 18px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  transform: translateY(-50%) !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform-origin: center !important;
 }
 
-.sidebar-toggle-button:hover {
-  border-color: var(--fx-border-strong) !important;
-  background: var(--fx-bg-card-soft) !important;
+/* XML está ficando grande visualmente */
+.step-icon-img[src*="arquivo-xml"],
+.kpi-icon-img[src*="arquivo-xml"] {
+  transform: scale(0.92) !important;
 }
 
-.sidebar-collapsed .brand-box {
-  width: 48px !important;
-  min-height: 52px !important;
-  padding: 7px !important;
-  justify-content: center !important;
+/* Documento laranja está bom, só segura um pouco */
+.step-icon-img[src*="document-orange"],
+.kpi-icon-img[src*="document-orange"],
+.step-icon-img[src*="documentos"],
+.kpi-icon-img[src*="documentos"] {
+  transform: scale(0.95) !important;
 }
 
-.sidebar-collapsed .brand-mark {
-  width: 34px !important;
-  height: 34px !important;
-  font-size: 12px !important;
-  border-radius: 10px !important;
+/* Home tem desenho fino/pequeno, precisa crescer */
+.step-icon-img[src*="home"],
+.kpi-icon-img[src*="home"] {
+  transform: scale(1.12) !important;
 }
 
-.sidebar-collapsed .sidebar-toggle-button {
-  top: auto !important;
-  right: 50% !important;
-  bottom: -13px !important;
-  width: 22px !important;
-  height: 18px !important;
-  border-radius: 7px !important;
-  font-size: 15px !important;
-  transform: translateX(50%) !important;
-  background: var(--fx-bg-sidebar) !important;
+/* Setas esquerda/direita estão grandes e largas */
+.step-icon-img[src*="esquerda-direita"],
+.kpi-icon-img[src*="esquerda-direita"] {
+  transform: scale(0.88) !important;
 }
 
-.sidebar-collapsed .sidebar-nav {
-  margin-top: 22px !important;
+/* Atenção/warning está grande demais no card roxo */
+.step-icon-img[src*="atencao"],
+.kpi-icon-img[src*="atencao"],
+.step-icon-img[src*="warning"],
+.kpi-icon-img[src*="warning"] {
+  transform: scale(0.88) !important;
 }
+
+/* Chave inglesa tem muita área útil, reduz um pouco */
+.step-icon-img[src*="chave-inglesa"],
+.kpi-icon-img[src*="chave-inglesa"] {
+  transform: scale(0.92) !important;
+}
+
 /* =========================================================
-   BRAND COMO BOTÃO DA SIDEBAR
+   FERRES - ÍCONES SEM CAIXA COLORIDA DE FUNDO
    ========================================================= */
 
-.brand-box-button {
-  width: 100% !important;
-  color: var(--fx-text-main) !important;
-  text-align: left !important;
-  cursor: pointer !important;
+.step-icon,
+.kpi-icon {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 
-.brand-box-button:hover {
-  border-color: var(--fx-border-strong) !important;
-  background:
-    linear-gradient(135deg, rgba(19, 194, 194, 0.16), rgba(177, 119, 85, 0.08)),
-    var(--fx-bg-card-soft) !important;
+.step-card:hover .step-icon {
+    background: transparent !important;
 }
 
-.brand-box-button:focus {
-  outline: none !important;
-  border-color: var(--fx-primary) !important;
-  box-shadow: 0 0 0 3px rgba(19, 194, 194, 0.12) !important;
+.kpi-orange .kpi-icon,
+.kpi-purple .kpi-icon,
+.kpi-blue .kpi-icon,
+.kpi-teal .kpi-icon,
+.kpi-red .kpi-icon {
+    background: transparent !important;
 }
 
-.sidebar-toggle-button {
-  display: none !important;
+/* Ícones podem ocupar melhor o espaço porque não existe mais fundo atrás */
+.step-icon-img {
+    width: 34px !important;
+    height: 34px !important;
 }
 
-.sidebar-collapsed .brand-box-button {
-  width: 48px !important;
-  min-height: 52px !important;
-  padding: 7px !important;
-  justify-content: center !important;
-}
-
-.sidebar-collapsed .brand-box-button:hover {
-  border-color: var(--fx-border-strong) !important;
-  background:
-    linear-gradient(135deg, rgba(19, 194, 194, 0.18), rgba(177, 119, 85, 0.1)),
-    var(--fx-bg-card-soft) !important;
-}
-
-.sidebar-collapsed .brand-text {
-  display: none !important;
+.kpi-icon-img {
+    width: 34px !important;
+    height: 34px !important;
 }

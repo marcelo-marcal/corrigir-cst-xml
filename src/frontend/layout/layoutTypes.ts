@@ -14,4 +14,5 @@ export type ItemMenuSistema = {
   titulo: string;
   subtitulo: string;
   icone: string;
+  arquivoIcone?: string;
 };

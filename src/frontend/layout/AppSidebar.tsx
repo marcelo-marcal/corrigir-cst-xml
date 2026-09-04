@@ -1,3 +1,4 @@
+import { FxIcon } from "../components/FxIcon";
 import type { AbaSistema, ItemMenuSistema } from "./layoutTypes";
 
 type AppSidebarProps = {
@@ -36,7 +37,14 @@ export function AppSidebar(props: AppSidebarProps) {
             onClick={() => props.aoSelecionarAba(aba.id)}
             title={aba.titulo}
           >
-            <span className="sidebar-icon">{aba.icone}</span>
+            <span className="sidebar-icon">
+              <FxIcon
+                arquivo={aba.arquivoIcone}
+                textoAlternativo={aba.titulo}
+                fallback={aba.icone}
+                className="sidebar-icon-img"
+              />
+            </span>
 
             <span className="sidebar-label">
               <strong>{aba.titulo}</strong>

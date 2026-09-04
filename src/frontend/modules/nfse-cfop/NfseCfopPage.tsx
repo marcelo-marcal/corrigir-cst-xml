@@ -32,7 +32,7 @@ export function NfseCfopPage() {
 
   const [status, setStatus] = useState<StatusExecucaoNfseCfop>("parado");
   const [mensagem, setMensagem] = useState(
-    "Selecione as NFSe, escolha a pasta de saída e separe os lotes para importação no Questor.",
+    "Selecione as NFSe, escolha a pasta de saída e separe os lotes pelo local da prestação do serviço.",
   );
   const [resultados, setResultados] = useState<ResultadoArquivoNfseCfop[]>([]);
   const [progresso, setProgresso] = useState(0);
@@ -165,7 +165,7 @@ export function NfseCfopPage() {
     }
 
     setStatus("processando");
-    setMensagem("Separando NFSe para importação no Questor...");
+    setMensagem("Separando NFSe pelo local da prestação do serviço...");
     setResultados([]);
     setProgresso(0);
 
@@ -193,6 +193,8 @@ export function NfseCfopPage() {
           nome: item.nome,
           caminho: item.caminho,
           ufPrestador: analise.ufPrestador,
+          ufLocalPrestacao: analise.ufLocalPrestacao,
+          cLocPrestacao: analise.cLocPrestacao,
           ufTomador: analise.ufTomador,
           cMunTomador: analise.cMunTomador,
           categoria: analise.categoria,
@@ -257,8 +259,8 @@ export function NfseCfopPage() {
     <div className="xml-correcao-page nfse-cfop-page">
       <FxPageHeader
         eyebrow="NFSe Questor"
-        titulo="Separador de XML por Natureza"
-        descricao="O sistema lê a UF do prestador e identifica a UF do tomador pelo cMun. Depois separa os XMLs em pastas próprias para importar no Questor com Natureza 5.933.004 ou 6.933.004."
+        titulo="Separador por Local da Prestação"
+        descricao="O sistema lê a UF do prestador e compara com a UF do local da prestação do serviço informada em cLocPrestacao. Depois separa os XMLs para importar no Questor com Natureza 5.933.004 ou 6.933.004."
       >
         <div className={`status-pill status-${status}`}>
           {status === "parado" && "Aguardando"}
@@ -272,7 +274,7 @@ export function NfseCfopPage() {
         <div className="summary-block nfse-rule-card">
           <span>XML interno</span>
           <p>
-            Prestador e tomador na mesma UF:
+            UF do prestador igual à UF do local da prestação:
             <strong> importar com 5.933.004</strong>
           </p>
         </div>
@@ -280,16 +282,16 @@ export function NfseCfopPage() {
         <div className="summary-block nfse-rule-card">
           <span>XML interestadual</span>
           <p>
-            Prestador e tomador em UFs diferentes:
+            UF do prestador diferente da UF do local da prestação:
             <strong> importar com 6.933.004</strong>
           </p>
         </div>
 
         <div className="summary-block nfse-rule-card">
-          <span>Saída</span>
+          <span>Campo usado</span>
           <p>
-            O XML não é alterado. Ele é apenas copiado para a pasta correta de
-            importação.
+            A separação usa a tag <strong>cLocPrestacao</strong>. O endereço do
+            tomador fica apenas para conferência.
           </p>
         </div>
       </section>
@@ -364,7 +366,7 @@ export function NfseCfopPage() {
         <FxKpiCard
           valor={arquivosInternos}
           titulo="Internas"
-          descricao="Importar no Questor com Natureza 5.933.004."
+          descricao="Prestador e local da prestação na mesma UF."
           icone="⌂"
           variante="teal"
         />
@@ -372,7 +374,7 @@ export function NfseCfopPage() {
         <FxKpiCard
           valor={arquivosInterestaduais}
           titulo="Interestaduais"
-          descricao="Importar no Questor com Natureza 6.933.004."
+          descricao="Prestador e local da prestação em UFs diferentes."
           icone="⇄"
           variante="blue"
         />
@@ -380,7 +382,7 @@ export function NfseCfopPage() {
         <FxKpiCard
           valor={arquivosNaoIdentificados}
           titulo="Conferir"
-          descricao="Arquivos com erro ou sem identificação completa."
+          descricao="Arquivos sem identificação completa do local da prestação."
           icone="⚠"
           variante="purple"
         />
@@ -414,8 +416,10 @@ export function NfseCfopPage() {
                 <tr>
                   <th>Arquivo</th>
                   <th>Prestador</th>
+                  <th>Local Prest.</th>
+                  <th>cLocPrestacao</th>
                   <th>Tomador</th>
-                  <th>cMun</th>
+                  <th>cMun Tomador</th>
                   <th>Natureza</th>
                   <th>Pasta</th>
                   <th>Status</th>
@@ -425,7 +429,7 @@ export function NfseCfopPage() {
               <tbody>
                 {resultados.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="empty-cell">
+                    <td colSpan={9} className="empty-cell">
                       Nenhum processamento executado ainda.
                     </td>
                   </tr>
@@ -434,6 +438,8 @@ export function NfseCfopPage() {
                     <tr key={resultado.caminho}>
                       <td>{resultado.nome}</td>
                       <td>{resultado.ufPrestador ?? "-"}</td>
+                      <td>{resultado.ufLocalPrestacao ?? "-"}</td>
+                      <td>{resultado.cLocPrestacao ?? "-"}</td>
                       <td>{resultado.ufTomador ?? "-"}</td>
                       <td>{resultado.cMunTomador ?? "-"}</td>
                       <td>{resultado.naturezaQuestor}</td>
@@ -480,18 +486,18 @@ export function NfseCfopPage() {
           </div>
 
           <div className="summary-block">
-            <span>Conferência</span>
+            <span>Campo decisivo</span>
             <p>
-              Arquivos sem UF do prestador ou sem cMun do tomador vão para
-              <strong> nao-identificados-conferir</strong>.
+              A separação é feita pelo <strong>cLocPrestacao</strong>, ou seja,
+              pelo local da prestação do serviço.
             </p>
           </div>
 
           <div className="summary-block">
-            <span>Segurança</span>
+            <span>Conferência</span>
             <p>
-              O XML original não é alterado. O sistema apenas copia cada arquivo
-              para a pasta correta.
+              O município do tomador aparece apenas para conferência e não
+              decide a pasta.
             </p>
           </div>
         </aside>

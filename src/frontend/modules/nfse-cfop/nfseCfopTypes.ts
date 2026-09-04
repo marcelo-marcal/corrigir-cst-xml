@@ -15,6 +15,8 @@ export type ResultadoArquivoNfseCfop = {
   nome: string;
   caminho: string;
   ufPrestador?: string;
+  ufLocalPrestacao?: string;
+  cLocPrestacao?: string;
   ufTomador?: string;
   cMunTomador?: string;
   categoria: CategoriaSeparacaoNfse;

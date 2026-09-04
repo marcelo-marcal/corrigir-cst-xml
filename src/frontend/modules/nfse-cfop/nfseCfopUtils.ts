@@ -160,6 +160,16 @@ export function obterUfPrestador(conteudoXml: string): string | undefined {
   return resultado?.[1]?.toUpperCase();
 }
 
+export function obterCodigoLocalPrestacao(
+  conteudoXml: string,
+): string | undefined {
+  const resultado = conteudoXml.match(
+    /<locPrest\b[\s\S]*?<cLocPrestacao>\s*(\d{7})\s*<\/cLocPrestacao>[\s\S]*?<\/locPrest>/i,
+  );
+
+  return resultado?.[1];
+}
+
 export function obterCodigoMunicipioTomador(
   conteudoXml: string,
 ): string | undefined {
@@ -170,7 +180,7 @@ export function obterCodigoMunicipioTomador(
   return resultado?.[1];
 }
 
-export function obterUfTomadorPorCodigoMunicipio(
+export function obterUfPorCodigoMunicipio(
   codigoMunicipio: string | undefined,
 ): string | undefined {
   if (!codigoMunicipio || codigoMunicipio.length < 2) {
@@ -183,13 +193,13 @@ export function obterUfTomadorPorCodigoMunicipio(
 
 export function classificarNfseParaQuestor(params: {
   ufPrestador?: string;
-  ufTomador?: string;
+  ufLocalPrestacao?: string;
 }): {
   categoria: CategoriaSeparacaoNfse;
   naturezaQuestor: "5.933.004" | "6.933.004" | "conferir";
   pastaDestino: string;
 } {
-  if (!params.ufPrestador || !params.ufTomador) {
+  if (!params.ufPrestador || !params.ufLocalPrestacao) {
     return {
       categoria: "naoIdentificada",
       naturezaQuestor: "conferir",
@@ -197,7 +207,10 @@ export function classificarNfseParaQuestor(params: {
     };
   }
 
-  if (params.ufPrestador.toUpperCase() === params.ufTomador.toUpperCase()) {
+  if (
+    params.ufPrestador.toUpperCase() ===
+    params.ufLocalPrestacao.toUpperCase()
+  ) {
     return {
       categoria: "interna",
       naturezaQuestor: "5.933.004",
@@ -214,6 +227,8 @@ export function classificarNfseParaQuestor(params: {
 
 export function analisarNfseParaSeparacaoQuestor(conteudoXml: string): {
   ufPrestador?: string;
+  ufLocalPrestacao?: string;
+  cLocPrestacao?: string;
   ufTomador?: string;
   cMunTomador?: string;
   categoria: CategoriaSeparacaoNfse;
@@ -221,16 +236,22 @@ export function analisarNfseParaSeparacaoQuestor(conteudoXml: string): {
   pastaDestino: string;
 } {
   const ufPrestador = obterUfPrestador(conteudoXml);
+
+  const cLocPrestacao = obterCodigoLocalPrestacao(conteudoXml);
+  const ufLocalPrestacao = obterUfPorCodigoMunicipio(cLocPrestacao);
+
   const cMunTomador = obterCodigoMunicipioTomador(conteudoXml);
-  const ufTomador = obterUfTomadorPorCodigoMunicipio(cMunTomador);
+  const ufTomador = obterUfPorCodigoMunicipio(cMunTomador);
 
   const classificacao = classificarNfseParaQuestor({
     ufPrestador,
-    ufTomador,
+    ufLocalPrestacao,
   });
 
   return {
     ufPrestador,
+    ufLocalPrestacao,
+    cLocPrestacao,
     ufTomador,
     cMunTomador,
     categoria: classificacao.categoria,
@@ -268,10 +289,18 @@ export function gerarRelatorioNfseCfop(params: {
   linhas.push("");
   linhas.push("Regra aplicada:");
   linhas.push(
-    "Quando a UF do prestador for igual à UF do tomador, o XML é separado para importação com Natureza 5.933.004.",
+    "A separação considera a UF do prestador e a UF do local da prestação do serviço, identificada pela tag cLocPrestacao.",
   );
   linhas.push(
-    "Quando a UF do prestador for diferente da UF do tomador, o XML é separado para importação com Natureza 6.933.004.",
+    "Quando a UF do prestador for igual à UF do local da prestação, o XML é separado para importação com Natureza 5.933.004.",
+  );
+  linhas.push(
+    "Quando a UF do prestador for diferente da UF do local da prestação, o XML é separado para importação com Natureza 6.933.004.",
+  );
+  linhas.push("");
+  linhas.push("Observação importante:");
+  linhas.push(
+    "O endereço do tomador é exibido apenas para conferência. Ele não decide a pasta de separação.",
   );
   linhas.push("");
   linhas.push(`Arquivos analisados: ${params.arquivosSelecionados}`);
@@ -295,9 +324,11 @@ export function gerarRelatorioNfseCfop(params: {
       continue;
     }
 
-    const localizacao = `Prestador ${resultado.ufPrestador ?? "-"} / Tomador ${
+    const localizacao = `Prestador ${resultado.ufPrestador ?? "-"} / Local prestação ${
+      resultado.ufLocalPrestacao ?? "-"
+    } / cLocPrestacao ${resultado.cLocPrestacao ?? "-"} / Tomador ${
       resultado.ufTomador ?? "-"
-    } / cMun ${resultado.cMunTomador ?? "-"}`;
+    } / cMun tomador ${resultado.cMunTomador ?? "-"}`;
 
     if (resultado.categoria === "interna") {
       linhas.push(
@@ -314,7 +345,7 @@ export function gerarRelatorioNfseCfop(params: {
     }
 
     linhas.push(
-      `[CONFERIR] ${resultado.caminho} -> ${PASTA_RAIZ_SEPARACAO}/${resultado.pastaDestino} - Não foi possível identificar UF do prestador ou UF do tomador - ${localizacao}`,
+      `[CONFERIR] ${resultado.caminho} -> ${PASTA_RAIZ_SEPARACAO}/${resultado.pastaDestino} - Não foi possível identificar UF do prestador ou UF do local da prestação - ${localizacao}`,
     );
   }
 
